@@ -1,56 +1,35 @@
 Rails.application.routes.draw do
-  # The priority is based upon order of creation: first created -> highest priority.
-  # See how all your routes lay out with "rake routes".
+  namespace :api, defaults: { format: :json } do
+    namespace :v1 do
+      get 'items/random', to: 'items#random'
+      get 'items/find', to: 'items#find'
+      get 'items/find_all', to: 'items#find_all'
+      resources :items, except: [:new, :edit]
 
-  # You can have the root of your site routed with "root"
-  # root 'welcome#index'
+      get 'customers/random', to: 'customers#random'
+      get 'customers/find', to: 'customers#find'
+      get 'customers/find_all', to: 'customers#find_all'
+      resources :customers, except: [:new, :edit]
 
-  # Example of regular route:
-  #   get 'products/:id' => 'catalog#view'
+      get 'merchants/random', to: 'merchants#random'
+      get 'merchants/find', to: 'merchants#find'
+      get 'merchants/find_all', to: 'merchants#find_all'
+      resources :merchants, except: [:new, :edit]
 
-  # Example of named route that can be invoked with purchase_url(id: product.id)
-  #   get 'products/:id/purchase' => 'catalog#purchase', as: :purchase
+      get 'invoices/random', to: 'invoices#random'
+      get 'invoices/find', to: 'invoices#find'
+      get 'invoices/find_all', to: 'invoices#find_all'
+      resources :invoices, except: [:new, :edit]
 
-  # Example resource route (maps HTTP verbs to controller actions automatically):
-  #   resources :products
+      get 'invoice_items/random', to: 'invoice_items#random'
+      get 'invoice_items/find', to: 'invoice_items#find'
+      get 'invoice_items/find_all', to: 'invoice_items#find_all'
+      resources :invoice_items, except: [:new, :edit]
 
-  # Example resource route with options:
-  #   resources :products do
-  #     member do
-  #       get 'short'
-  #       post 'toggle'
-  #     end
-  #
-  #     collection do
-  #       get 'sold'
-  #     end
-  #   end
-
-  # Example resource route with sub-resources:
-  #   resources :products do
-  #     resources :comments, :sales
-  #     resource :seller
-  #   end
-
-  # Example resource route with more complex sub-resources:
-  #   resources :products do
-  #     resources :comments
-  #     resources :sales do
-  #       get 'recent', on: :collection
-  #     end
-  #   end
-
-  # Example resource route with concerns:
-  #   concern :toggleable do
-  #     post 'toggle'
-  #   end
-  #   resources :posts, concerns: :toggleable
-  #   resources :photos, concerns: :toggleable
-
-  # Example resource route within a namespace:
-  #   namespace :admin do
-  #     # Directs /admin/products/* to Admin::ProductsController
-  #     # (app/controllers/admin/products_controller.rb)
-  #     resources :products
-  #   end
+      get 'transactions/random', to: 'transactions#random'
+      get 'transactions/find', to: 'transactions#find'
+      get 'transactions/find_all', to: 'transactions#find_all'
+      resources :transactions, except: [:new, :edit]
+    end
+  end
 end
