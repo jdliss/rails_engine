@@ -34,6 +34,7 @@ Rails.application.routes.draw do
         member do
           get '/items', to: 'merchants#items'
           get '/invoices', to: 'merchants#invoices'
+          get '/most_revenue', to: 'merchants#most_revenue'
         end
       end
 

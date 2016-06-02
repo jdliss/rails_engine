@@ -14,6 +14,9 @@ module Api
       def invoices
         respond_with @object.invoices
       end
+
+      def most_revenue
+      end
     end
   end
 end

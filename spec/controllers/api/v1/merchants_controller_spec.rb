@@ -131,4 +131,16 @@ RSpec.describe Api::V1::MerchantsController do
       expect(merchant_invoices.first[:status]).to eq "shipped"
     end
   end
+
+  describe "most_revenue" do
+   xit "responds with top x merchants by revenue" do
+      get :most_revenue, format: :json, id: @merchant.id
+
+      merchants = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(merchants.count).to eq 3
+      expect(merchants.first[:status]).to eq "shipped"
+    end
+  end
 end

@@ -11,9 +11,9 @@ module Api
         respond_with @object.invoice_items
       end
 
-#      def merchant
-#        respond_with @object.merchant
-#      end
+      def merchant
+        respond_with @object.merchant
+      end
     end
   end
 end
