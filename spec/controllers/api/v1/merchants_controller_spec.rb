@@ -132,15 +132,138 @@ RSpec.describe Api::V1::MerchantsController do
     end
   end
 
-  describe "most_revenue" do
-   xit "responds with top x merchants by revenue" do
-      get :most_revenue, format: :json, id: @merchant.id
+  describe "Merchant.most_revenue" do
+    it "responds with top x merchants by revenue" do
+      top_merchant = Merchant.create(
+        name: "top merchant"
+      )
+      top_invoice = Invoice.create(merchant_id: top_merchant.id)
+      InvoiceItem.create(
+        invoice_id: top_invoice.id,
+        unit_price: 100,
+        quantity: 10
+      )
+
+      second_merchant = Merchant.create(
+        name: "second merchant"
+      )
+      second_invoice = Invoice.create(merchant_id: second_merchant.id)
+      InvoiceItem.create(
+        invoice_id: second_invoice.id,
+        unit_price: 100,
+        quantity: 5
+      )
+
+      third_merchant = Merchant.create(
+        name: "third merchant"
+      )
+      third_invoice = Invoice.create(merchant_id: third_merchant.id)
+      InvoiceItem.create(
+        invoice_id: third_invoice.id,
+        unit_price: 100,
+        quantity: 1
+      )
+
+      get :most_revenue, format: :json, quantity: 2
 
       merchants = JSON.parse(response.body, symbolize_names: true)
 
       expect(response).to have_http_status(:success)
-      expect(merchants.count).to eq 3
-      expect(merchants.first[:status]).to eq "shipped"
+      expect(merchants.count).to eq 2
+      expect(merchants.first[:name]).to eq "top merchant"
+      expect(merchants.second[:name]).to eq "second merchant"
+    end
+  end
+
+  describe "revenue" do
+    it "responds with the revenue of the given merchant" do
+      merchant = Merchant.create(
+        name: "top merchant"
+      )
+
+      invoice = Invoice.create(merchant_id: merchant.id)
+      transaction = Transaction.create(
+        invoice_id: invoice.id,
+        result: 'success'
+      )
+
+      InvoiceItem.create(
+        invoice_id: invoice.id,
+        unit_price: 100,
+        quantity: 10
+      )
+
+      get :revenue, format: :json, id: merchant.id
+
+      revenue = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(revenue).to eq ({ :revenue => '10.0' })
+    end
+  end
+
+  describe "revenue(date)" do
+    it "responds with the revenue of the given merchant for a given date" do
+      merchant = Merchant.create(
+        name: "top merchant"
+      )
+
+      invoice = Invoice.create(
+        merchant_id: merchant.id,
+        created_at: "2012-03-16 11:55:05"
+      )
+
+      transaction = Transaction.create(
+        invoice_id: invoice.id,
+        result: 'success'
+      )
+
+      InvoiceItem.create(
+        invoice_id: invoice.id,
+        unit_price: 100,
+        quantity: 10
+      )
+
+      get :revenue, format: :json, id: merchant.id, date: "2012-03-16 11:55:05"
+
+      revenue = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(revenue).to eq ({ :revenue => '10.0' })
+    end
+  end
+
+  describe "Merchant.most_items" do
+    it "responds with the revenue of the given merchant for a given date" do
+      merchant = Merchant.create(
+        name: "top merchant"
+      )
+
+      Item.create(merchant_id: merchant.id)
+      Item.create(merchant_id: merchant.id)
+      Item.create(merchant_id: merchant.id)
+
+      merchant2 = Merchant.create(
+        name: "second merchant"
+      )
+
+      Item.create(merchant_id: merchant2.id)
+      Item.create(merchant_id: merchant2.id)
+
+      merchant3 = Merchant.create(
+        name: "third merchant"
+      )
+
+      Item.create(merchant_id: merchant3.id)
+
+      get :most_items, format: :json, quantity: 2
+
+      merchants = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(merchants.count).to eq 2
+      expect(merchants.first[:name]).to eq "top merchant"
+      expect(merchants.second[:name]).to eq "second merchant"
     end
   end
 end

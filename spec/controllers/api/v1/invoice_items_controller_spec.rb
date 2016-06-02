@@ -124,7 +124,7 @@ RSpec.describe Api::V1::InvoiceItemsController do
 
     it "responds with an invoice item matching passed unit price" do
       unit_price = @invoice_item.unit_price
-      get :show, format: :json, unit_price: unit_price
+      get :show, format: :json, unit_price: unit_price/100
 
       invoice_items_hash = JSON.parse(response.body, symbolize_names: true)
 
@@ -200,7 +200,7 @@ RSpec.describe Api::V1::InvoiceItemsController do
       )
 
       unit_price = @invoice_item.unit_price
-      get :find_all, format: :json, unit_price: unit_price
+      get :find_all, format: :json, unit_price: unit_price/100
 
       invoice_items_hash = JSON.parse(response.body, symbolize_names: true)
 

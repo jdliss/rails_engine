@@ -1,7 +1,8 @@
 module Api
   module V1
     class SuperController < ApiController
-      before_action :find_object, except: [:index, :show, :random, :find_all]
+      respond_to :json
+      before_action :find_object, except: [:index, :show, :random, :find_all, :most_revenue]
 
       def index
         respond_with model.all
@@ -21,18 +22,6 @@ module Api
         respond_with model.where(key => val)
       end
 
-      def action_missing(name)
-        begin
-          self.send name
-        rescue
-          if @object.respond_to?(name)
-            respond_with @object.send(name)
-          else
-            raise AbstractController::ActionNotFound
-          end
-        end
-      end
-
       private
 
       def model
@@ -44,11 +33,29 @@ module Api
           params.delete(key)
         end
         key = params.keys.first
-        [key, params[key]]
+        val = parse_value(key, params[key])
+        [key, val]
+      end
+
+      def parse_value(key, val)
+        key == "unit_price" ? (val.to_f*100).round(2) : val
       end
 
       def find_object
         @object = model.find(params[:id])
+      end
+
+      def action_missing(name)
+        begin
+          self.send(name)
+        rescue
+          if @object.respond_to?(name)
+            respond_with @object.send(name)
+          else
+            raise AbstractController::ActionNotFound,
+              "#{name} is not a method for #{controller_name.captialize}Controller"
+          end
+        end
       end
     end
   end
