@@ -76,6 +76,30 @@ RSpec.describe Api::V1::TransactionsController do
       expect(transaction_hash[:credit_card_number]).to eq @transaction.credit_card_number
       expect(transaction_hash[:result]).to eq "success"
     end
+
+    it "responds with a transaction matching passed id" do
+      id = @transaction.id
+      get :show, format: :json, id: id
+
+      transaction_hash = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(transaction_hash[:invoice_id]).to eq @invoice.id
+      expect(transaction_hash[:credit_card_number]).to eq @transaction.credit_card_number
+      expect(transaction_hash[:result]).to eq "success"
+    end
+
+    it "responds with a transaction matching passed result (case insensitive)" do
+      result = @transaction.result.upcase
+      get :show, format: :json, result: result
+
+      transaction_hash = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(transaction_hash[:invoice_id]).to eq @invoice.id
+      expect(transaction_hash[:credit_card_number]).to eq @transaction.credit_card_number
+      expect(transaction_hash[:result]).to eq "success"
+    end
   end
 
   describe "random" do
@@ -89,32 +113,6 @@ RSpec.describe Api::V1::TransactionsController do
       expect(transaction_hash[:invoice_id]).to_not eq nil
       expect(transaction_hash[:credit_card_number]).to_not eq nil
       expect(transaction_hash[:result]).to_not eq nil
-    end
-  end
-
-  describe "find" do
-    it "responds with a transaction matching passed id" do
-      id = @transaction.id
-      get :find, format: :json, id: id
-
-      transaction_hash = JSON.parse(response.body, symbolize_names: true)
-
-      expect(response).to have_http_status(:success)
-      expect(transaction_hash[:invoice_id]).to eq @invoice.id
-      expect(transaction_hash[:credit_card_number]).to eq @transaction.credit_card_number
-      expect(transaction_hash[:result]).to eq "success"
-    end
-
-    it "responds with a transaction matching passed result (case insensitive)" do
-      result = @transaction.result.upcase
-      get :find, format: :json, result: result
-
-      transaction_hash = JSON.parse(response.body, symbolize_names: true)
-
-      expect(response).to have_http_status(:success)
-      expect(transaction_hash[:invoice_id]).to eq @invoice.id
-      expect(transaction_hash[:credit_card_number]).to eq @transaction.credit_card_number
-      expect(transaction_hash[:result]).to eq "success"
     end
   end
 
@@ -157,6 +155,17 @@ RSpec.describe Api::V1::TransactionsController do
       expect(transactions_hash.first[:invoice_id]).to eq @transaction.invoice_id
       expect(transactions_hash.first[:credit_card_number]).to eq @transaction.credit_card_number
       expect(transactions_hash.first[:result]).to eq "success"
+    end
+  end
+
+  describe "invoice" do
+    it "responds with the transaction's invoice" do
+      get :invoice, format: :json, id: @transaction.id
+
+      invoice = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(invoice[:status]).to eq "shipped"
     end
   end
 end

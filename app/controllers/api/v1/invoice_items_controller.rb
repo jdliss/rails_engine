@@ -1,28 +1,18 @@
 module Api
   module V1
-    class InvoiceItemsController < ApiController
+    class InvoiceItemsController < SuperController
       respond_to :json
 
-      def index
-        respond_with InvoiceItem.all
+      def model
+        controller_name.classify.constantize
       end
 
-      def show
-        respond_with InvoiceItem.find(params[:id])
+      def invoice
+        respond_with @object.invoice
       end
 
-      def random
-        respond_with InvoiceItem.limit(1).order("RANDOM()").first
-      end
-
-      def find
-        key = params.keys.first
-        respond_with InvoiceItem.custom_find(key, params[key])
-      end
-
-      def find_all
-        key = params.keys.first
-        respond_with InvoiceItem.custom_where(key, params[key])
+      def item
+        respond_with @object.item
       end
     end
   end

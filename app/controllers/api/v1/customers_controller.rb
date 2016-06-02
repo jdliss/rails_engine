@@ -1,28 +1,18 @@
 module Api
   module V1
-    class CustomersController < ApiController
+    class CustomersController < SuperController
       respond_to :json
 
-      def index
-        respond_with Customer.all
+      def model
+        controller_name.classify.constantize
       end
 
-      def show
-        respond_with Customer.find(params[:id])
+      def invoices
+        respond_with @object.invoices
       end
 
-      def random
-        respond_with Customer.limit(1).order("RANDOM()").first
-      end
-
-      def find
-        key = params.keys.first
-        respond_with Customer.custom_find(key, params[key])
-      end
-
-      def find_all
-        key = params.keys.first
-        respond_with Customer.custom_where(key, params[key])
+      def transactions
+        respond_with @object.transactions
       end
     end
   end

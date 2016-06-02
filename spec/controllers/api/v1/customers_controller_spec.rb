@@ -42,6 +42,28 @@ RSpec.describe Api::V1::CustomersController do
       expect(customer_hash[:first_name]).to eq "Dave"
       expect(customer_hash[:last_name]).to eq "Chappelle"
     end
+
+    it "responds with an customer matching passed id" do
+      id = @customer.id
+      get :show, format: :json, id: id
+
+      customer_hash = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(customer_hash[:first_name]).to eq "Dave"
+      expect(customer_hash[:last_name]).to eq "Chappelle"
+    end
+
+    it "responds with an customer matching passed name (case insensitive)" do
+      name = @customer.first_name.downcase
+      get :show, format: :json, first_name: name
+
+      customer_hash = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(customer_hash[:first_name]).to eq "Dave"
+      expect(customer_hash[:last_name]).to eq "Chappelle"
+    end
   end
 
   describe "random" do
@@ -54,30 +76,6 @@ RSpec.describe Api::V1::CustomersController do
       expect(customer_hash).to_not eq nil
       expect(customer_hash[:first_name]).to_not eq nil
       expect(customer_hash[:last_name]).to_not eq nil
-    end
-  end
-
-  describe "find" do
-    it "responds with an customer matching passed id" do
-      id = @customer.id
-      get :find, format: :json, id: id
-
-      customer_hash = JSON.parse(response.body, symbolize_names: true)
-
-      expect(response).to have_http_status(:success)
-      expect(customer_hash[:first_name]).to eq "Dave"
-      expect(customer_hash[:last_name]).to eq "Chappelle"
-    end
-
-    it "responds with an customer matching passed name (case insensitive)" do
-      name = @customer.first_name.downcase
-      get :find, format: :json, first_name: name
-
-      customer_hash = JSON.parse(response.body, symbolize_names: true)
-
-      expect(response).to have_http_status(:success)
-      expect(customer_hash[:first_name]).to eq "Dave"
-      expect(customer_hash[:last_name]).to eq "Chappelle"
     end
   end
 
@@ -106,6 +104,37 @@ RSpec.describe Api::V1::CustomersController do
       expect(customer_hash.count).to eq 2
       expect(customer_hash.first[:first_name]).to eq "Dave"
       expect(customer_hash.first[:last_name]).to eq "Chappelle"
+    end
+  end
+
+  describe "invoices" do
+    it "responds with the customer's invoices" do
+      Invoice.create(customer_id: @customer.id, status: "shipped")
+      Invoice.create(customer_id: @customer.id, status: "returned")
+      get :invoices, format: :json, id: @customer.id
+
+      invoices = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(invoices.count).to eq 2
+      expect(invoices.first[:status]).to eq "shipped"
+      expect(invoices.last[:status]).to eq "returned"
+    end
+  end
+
+  describe "transactions" do
+    it "responds with the customer's transactions" do
+      invoice = Invoice.create(customer_id: @customer.id, status: "returned")
+      Transaction.create(invoice_id: invoice.id, result: "success")
+      Transaction.create(invoice_id: invoice.id, result: "failed")
+      get :transactions, format: :json, id: @customer.id
+
+      transactions = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(transactions.count).to eq 2
+      expect(transactions.first[:result]).to eq "success"
+      expect(transactions.last[:result]).to eq "failed"
     end
   end
 end

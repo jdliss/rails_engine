@@ -64,24 +64,10 @@ RSpec.describe Api::V1::InvoicesController do
       expect(invoice_hash[:customer_id]).to eq @customer.id
       expect(invoice_hash[:merchant_id]).to eq @merchant.id
     end
-  end
 
-  describe "random" do
-    it "responds with a random invoice" do
-      get :random, format: :json
-
-      invoice_hash = JSON.parse(response.body, symbolize_names: true)
-
-      expect(response).to have_http_status(:success)
-      expect(invoice_hash).to_not eq nil
-      expect(invoice_hash[:status]).to_not eq nil
-    end
-  end
-
-  describe "find" do
     it "responds with an invoice matching passed id" do
       id = @invoice.id
-      get :find, format: :json, id: id
+      get :show, format: :json, id: id
 
       invoice_hash = JSON.parse(response.body, symbolize_names: true)
 
@@ -93,7 +79,7 @@ RSpec.describe Api::V1::InvoicesController do
 
     it "responds with an invoice matching passed status (case insensitive)" do
       status = @invoice.status.upcase
-      get :find, format: :json, status: status
+      get :show, format: :json, status: status
 
       invoices_hash = JSON.parse(response.body, symbolize_names: true)
 
@@ -101,6 +87,18 @@ RSpec.describe Api::V1::InvoicesController do
       expect(invoices_hash[:status]).to eq "shipped"
       expect(invoices_hash[:customer_id]).to eq @customer.id
       expect(invoices_hash[:merchant_id]).to eq @merchant.id
+    end
+  end
+
+  describe "random" do
+    it "responds with a random invoice" do
+      get :random, format: :json
+
+      invoice_hash = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(invoice_hash).to_not eq nil
+      expect(invoice_hash[:status]).to_not eq nil
     end
   end
 
@@ -131,6 +129,92 @@ RSpec.describe Api::V1::InvoicesController do
       expect(invoices_hash.first[:status]).to eq "shipped"
       expect(invoices_hash.first[:customer_id]).to eq @customer.id
       expect(invoices_hash.first[:merchant_id]).to eq @merchant.id
+    end
+  end
+
+  describe "transactions" do
+    it "responds with all the current invoice's transactions" do
+      Transaction.create(
+        credit_card_number: '4580251236515201',
+        invoice_id: @invoice.id,
+        result: "success"
+      )
+      Transaction.create(
+        credit_card_number: '4580251236515201',
+        invoice_id: @invoice.id,
+        result: "failed"
+      )
+
+      get :transactions, format: :json, id: @invoice.id
+
+      invoice_transactions = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(invoice_transactions.count).to eq 2
+      expect(invoice_transactions.first[:result]).to eq "success"
+      expect(invoice_transactions.last[:result]).to eq "failed"
+      expect(invoice_transactions.first[:credit_card_number]).to eq '4580251236515201'
+      expect(invoice_transactions.first[:invoice_id]).to eq @invoice.id
+    end
+  end
+
+  describe "invoice_items" do
+    it "responds with all the current invoice's invoice items" do
+      InvoiceItem.create(invoice_id: @invoice.id, quantity: 123)
+      InvoiceItem.create(invoice_id: @invoice.id, quantity: 321)
+
+      get :invoice_items, format: :json, id: @invoice.id
+
+      invoice_items = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(invoice_items.count).to eq 2
+      expect(invoice_items.first[:quantity]).to eq 123
+      expect(invoice_items.last[:quantity]).to eq 321
+      expect(invoice_items.first[:invoice_id]).to eq @invoice.id
+    end
+  end
+
+  describe "items" do
+    it "responds with all the current invoice's items" do
+     item = Item.create(name: "thing", description: "a thing.")
+      InvoiceItem.create(
+        item_id: item.id,
+        invoice_id: @invoice.id,
+        quantity: 123
+      )
+
+      get :items, format: :json, id: @invoice.id
+
+      items = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(items.count).to eq 1
+      expect(items.first[:name]).to eq "thing"
+      expect(items.last[:description]).to eq "a thing."
+    end
+  end
+
+  describe "customer" do
+    it "responds with all the current invoice's customer" do
+      get :customer, format: :json, id: @invoice.id
+
+      customer = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(customer[:first_name]).to eq "Dave"
+      expect(customer[:last_name]).to eq "Chappelle"
+    end
+  end
+
+  describe "customer" do
+    it "responds with all the current invoice's customer" do
+      get :merchant, format: :json, id: @invoice.id
+
+      customer = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(customer[:name]).to eq "Bob's House of Boats"
     end
   end
 end

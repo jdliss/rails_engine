@@ -37,6 +37,26 @@ RSpec.describe Api::V1::MerchantsController do
       expect(response).to have_http_status(:success)
       expect(merchant_hash[:name]).to eq "Bob's House of Boats"
     end
+
+    it "responds with a merchant matching passed id" do
+      id = @merchant.id
+      get :show, format: :json, id: id
+
+      merchant_hash = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(merchant_hash[:name]).to eq "Bob's House of Boats"
+    end
+
+    it "responds with a merchant matching passed name (case insensitive)" do
+      name = @merchant.name.downcase
+      get :show, format: :json, name: name
+
+      merchant_hash = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(merchant_hash[:name]).to eq "Bob's House of Boats"
+    end
   end
 
   describe "random" do
@@ -48,28 +68,6 @@ RSpec.describe Api::V1::MerchantsController do
       expect(response).to have_http_status(:success)
       expect(merchant_hash).to_not eq nil
       expect(merchant_hash[:name]).to_not eq nil
-    end
-  end
-
-  describe "find" do
-    it "responds with a merchant matching passed id" do
-      id = @merchant.id
-      get :find, format: :json, id: id
-
-      merchant_hash = JSON.parse(response.body, symbolize_names: true)
-
-      expect(response).to have_http_status(:success)
-      expect(merchant_hash[:name]).to eq "Bob's House of Boats"
-    end
-
-    it "responds with a merchant matching passed name (case insensitive)" do
-      name = @merchant.name.downcase
-      get :find, format: :json, name: name
-
-      merchant_hash = JSON.parse(response.body, symbolize_names: true)
-
-      expect(response).to have_http_status(:success)
-      expect(merchant_hash[:name]).to eq "Bob's House of Boats"
     end
   end
 
@@ -96,6 +94,41 @@ RSpec.describe Api::V1::MerchantsController do
       expect(response).to have_http_status(:success)
       expect(merchant_hash.count).to eq 2
       expect(merchant_hash.first[:name]).to eq "Bob's House of Boats"
+    end
+  end
+
+  describe "items" do
+    it "responds with all of a merchants items" do
+      Item.create(
+        name: "thing",
+        description: "a thing.",
+        merchant_id: @merchant.id
+      )
+
+      get :items, format: :json, id: @merchant.id
+
+      merchant_items = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(merchant_items.count).to eq 1
+      expect(merchant_items.first[:name]).to eq "thing"
+    end
+  end
+
+  describe "invoices" do
+    it "responds with all of a merchants invoices" do
+      Invoice.create(
+        status: "shipped",
+        merchant_id: @merchant.id
+      )
+
+      get :invoices, format: :json, id: @merchant.id
+
+      merchant_invoices = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(merchant_invoices.count).to eq 1
+      expect(merchant_invoices.first[:status]).to eq "shipped"
     end
   end
 end

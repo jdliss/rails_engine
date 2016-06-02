@@ -47,6 +47,28 @@ RSpec.describe Api::V1::ItemsController do
       expect(item_hash[:name]).to eq "GoPro"
       expect(item_hash[:description]).to eq "Cool camera."
     end
+
+    it "responds with an item matching passed id" do
+      id = @item.id
+      get :show, format: :json, id: id
+
+      item_hash = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(item_hash[:name]).to eq "GoPro"
+      expect(item_hash[:description]).to eq "Cool camera."
+    end
+
+    it "responds with an item matching passed name (case insensitive)" do
+      name = @item.name.downcase
+      get :show, format: :json, name: name
+
+      item_hash = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(item_hash[:name]).to eq "GoPro"
+      expect(item_hash[:description]).to eq "Cool camera."
+    end
   end
 
   describe "random" do
@@ -59,30 +81,6 @@ RSpec.describe Api::V1::ItemsController do
       expect(item_hash).to_not eq nil
       expect(item_hash[:name]).to_not eq nil
       expect(item_hash[:description]).to_not eq nil
-    end
-  end
-
-  describe "find" do
-    it "responds with an item matching passed id" do
-      id = @item.id
-      get :find, format: :json, id: id
-
-      item_hash = JSON.parse(response.body, symbolize_names: true)
-
-      expect(response).to have_http_status(:success)
-      expect(item_hash[:name]).to eq "GoPro"
-      expect(item_hash[:description]).to eq "Cool camera."
-    end
-
-    it "responds with an item matching passed name (case insensitive)" do
-      name = @item.name.downcase
-      get :find, format: :json, name: name
-
-      item_hash = JSON.parse(response.body, symbolize_names: true)
-
-      expect(response).to have_http_status(:success)
-      expect(item_hash[:name]).to eq "GoPro"
-      expect(item_hash[:description]).to eq "Cool camera."
     end
   end
 
@@ -111,6 +109,32 @@ RSpec.describe Api::V1::ItemsController do
       expect(item_hash.count).to eq 2
       expect(item_hash.first[:name]).to eq "GoPro"
       expect(item_hash.first[:description]).to eq "Cool camera."
+    end
+  end
+
+  describe "invoice_items" do
+    it "responds with the item's invoice items" do
+      InvoiceItem.create(item_id: @item.id, quantity: 123)
+      InvoiceItem.create(item_id: @item.id, quantity: 321)
+      get :invoice_items, format: :json, id: @item.id
+
+      invoice_items = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(invoice_items.count).to eq 2
+      expect(invoice_items.first[:quantity]).to eq 123
+      expect(invoice_items.second[:quantity]).to eq 321
+    end
+  end
+
+  describe "merchant" do
+    it "responds with the item's merchant" do
+      get :merchant, format: :json, id: @item.id
+
+      merchant = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(merchant[:name]).to eq "a merchant has no name"
     end
   end
 end
