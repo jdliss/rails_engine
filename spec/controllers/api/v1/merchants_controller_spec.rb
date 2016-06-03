@@ -234,27 +234,38 @@ RSpec.describe Api::V1::MerchantsController do
   end
 
   describe "Merchant.most_items" do
-    it "responds with the revenue of the given merchant for a given date" do
+    xit "responds with the revenue of the given merchant for a given date" do
       merchant = Merchant.create(
         name: "top merchant"
       )
+      Invoice.create(merchant_id: Merchant.last)
+      Transaction.create(invoice_id: Invoice.last)
 
       Item.create(merchant_id: merchant.id)
+      InvoiceItem.create(item_id: Item.last.id, invoice_id: Invoice.last.id)
       Item.create(merchant_id: merchant.id)
+      InvoiceItem.create(item_id: Item.last.id, invoice_id: Invoice.last.id)
       Item.create(merchant_id: merchant.id)
+      InvoiceItem.create(item_id: Item.last.id, invoice_id: Invoice.last.id)
 
       merchant2 = Merchant.create(
         name: "second merchant"
       )
+      Invoice.create(merchant_id: Merchant.last)
 
       Item.create(merchant_id: merchant2.id)
+      InvoiceItem.create(item_id: Item.last.id, invoice_id: Invoice.last.id)
       Item.create(merchant_id: merchant2.id)
+      InvoiceItem.create(item_id: Item.last.id, invoice_id: Invoice.last.id)
 
       merchant3 = Merchant.create(
         name: "third merchant"
       )
 
+      Invoice.create(merchant_id: Merchant.last)
+
       Item.create(merchant_id: merchant3.id)
+      InvoiceItem.create(item_id: Item.last.id, invoice_id: Invoice.last.id)
 
       get :most_items, format: :json, quantity: 2
 

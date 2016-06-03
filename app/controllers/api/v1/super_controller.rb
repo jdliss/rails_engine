@@ -2,7 +2,9 @@ module Api
   module V1
     class SuperController < ApiController
       respond_to :json
-      before_action :find_object, except: [:index, :show, :random, :find_all, :most_revenue]
+      before_action :find_object, except: [
+        :index, :show, :random, :find_all, :most_revenue, :most_items
+      ]
 
       def index
         respond_with model.all
@@ -52,8 +54,7 @@ module Api
           if @object.respond_to?(name)
             respond_with @object.send(name)
           else
-            raise AbstractController::ActionNotFound,
-              "#{name} is not a method for #{controller_name.captialize}Controller"
+            raise
           end
         end
       end
