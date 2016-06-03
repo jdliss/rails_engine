@@ -53,18 +53,6 @@ module Api
           define_method(name) { respond_with @object.send(name) }
         end
       end
-
-   #   def action_missing(name)
-   #     begin
-   #       self.send(name)
-   #     rescue
-   #       if @object.respond_to?(name)
-   #         respond_with @object.send(name)
-   #       else
-   #         raise
-   #       end
-   #     end
-   #   end
     end
   end
 end
