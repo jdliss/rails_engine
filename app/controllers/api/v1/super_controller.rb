@@ -2,6 +2,7 @@ module Api
   module V1
     class SuperController < ApiController
       respond_to :json
+
       before_action :find_object, except: [
         :index, :show, :random, :find_all, :most_revenue, :most_items
       ]
@@ -47,17 +48,23 @@ module Api
         @object = model.find(params[:id])
       end
 
-      def action_missing(name)
-        begin
-          self.send(name)
-        rescue
-          if @object.respond_to?(name)
-            respond_with @object.send(name)
-          else
-            raise
-          end
+      def self.create_methods(*names)
+        names.each do |name|
+          define_method(name) { respond_with @object.send(name) }
         end
       end
+
+   #   def action_missing(name)
+   #     begin
+   #       self.send(name)
+   #     rescue
+   #       if @object.respond_to?(name)
+   #         respond_with @object.send(name)
+   #       else
+   #         raise
+   #       end
+   #     end
+   #   end
     end
   end
 end

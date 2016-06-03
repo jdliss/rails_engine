@@ -12,6 +12,10 @@ gem 'jbuilder', '~> 2.0'
 gem 'sdoc', '~> 0.4.0', group: :doc
 gem 'active_model_serializers', '~> 0.10.0'
 
+group :test do
+  gem 'simplecov', :require => false
+end
+
 group :development, :test do
   gem 'pry', :require => 'pry'
   gem 'rspec-rails'

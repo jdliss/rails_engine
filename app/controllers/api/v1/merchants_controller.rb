@@ -1,6 +1,8 @@
 module Api
   module V1
     class MerchantsController < SuperController
+      create_methods :items, :invoices
+
       def revenue
         respond_with @object.revenue(params[:date])
       end
