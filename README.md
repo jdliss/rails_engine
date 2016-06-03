@@ -7,11 +7,19 @@
 `clone` the project and `bundle`.
 
 Run `rake load:all` to load all data from the CSV's
+
+or
+
 Run `rake load:merchants` to load from the merchants CSV
+
 Run `rake load:items` to load from the items CSV
+
 Run `rake load:customers` to load from the customers CSV
+
 Run `rake load:invoices` to load from the invoices CSV
+
 Run `rake load:invoice_items` to load from the invoice items CSV
+
 Run `rake load:transactions` to load from the transactions CSV
 
 
